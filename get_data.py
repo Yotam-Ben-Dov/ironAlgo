@@ -16,25 +16,27 @@ def get_headlines(address):
     response = requests.get(address)
     soup = BeautifulSoup(response.text, "html.parser")
     headlines = []
-    # separate into cases between haaretz and israel hayom and get headlines
-    
+    # separate into cases between haaretz and israel hayom
+    # convert it to list of dicts for ease of writing
     if "haaretz" in address:
-        # badly programmed site requires extra steps
-        articles = [a for a in soup.find_all("article")] # get the articles
-        headlines = [a.contents[0].get_text().strip() for a in articles if len(a.contents[0].get_text().strip()) >= 2] # filter them for headlines
-        headlines = [' '.join(a.split(' ')[2:]) if re.search("^(\d:\d\d|\d\d:\d\d) [APM]{2}", a) else a for a in headlines] # remove timestamps
+        # get the headlines
+        articles = [a for a in soup.find_all("article")]
+        headlines = [a.contents[0].get_text().strip() for a in articles] # filter them for headlines
+        # remove timestamps with regex
+        headlines = [' '.join(a.split(' ')[2:]) if re.search("^(\d:\d\d|\d\d:\d\d) [APM]{2}", a) else a for a in headlines]
         headlines = [{"headline": a, "magazine": "haaretz"} for a in headlines]
         
     elif "israelhayom" in address:
-        # israel hayom is easier
-        headlines = [a.get_text().strip() for a in soup.find_all(class_="jeg_post_title")] # get headlines
-        headlines = [{"headline": a, "magazine": "isarel hayom"} for a in headlines if len(a) > 2]
-        
+        # get headlines
+        headlines = [a.get_text().strip() for a in soup.find_all(class_="jeg_post_title")]
+        headlines = [{"headline": a, "magazine": "israel hayom"} for a in headlines if len(a) > 2]
+    
     return headlines
 
 def create_csv(headlines): # creates a csv file of the headlines and their tag
     with open('headlines.csv', 'w', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=["headline", "magazine"])
+        writer.writeheader()
         writer.writerows(headlines)
             
 
