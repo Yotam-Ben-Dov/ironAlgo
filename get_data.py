@@ -3,8 +3,7 @@ import csv
 import requests
 from bs4 import BeautifulSoup
 
-def main():
-    sources = ["https://www.haaretz.com/", "https://www.israelhayom.com/"]
+def get_data(sources):
     headlines = [hl for s in sources for hl in get_headlines(s)]
     create_csv(headlines)
     
@@ -13,7 +12,7 @@ def get_headlines(address):
     response = requests.get(address)
     soup = BeautifulSoup(response.text, "html.parser")
     headlines = []
-    # separate into cases between haaretz and israel hayom
+    # separate into cases between haaretz and israel hayom due to different site programming
     # convert it to list of dicts for ease of writing
     if "haaretz" in address:
         # get the headlines
