@@ -1,6 +1,3 @@
-# we first need to get data for our classifier
-# to do that we'll first connect to each site and extract the html.
-
 import re
 import csv
 import requests
@@ -24,7 +21,7 @@ def get_headlines(address):
         headlines = [a.contents[0].get_text().strip() for a in articles] # filter them for headlines
         # remove timestamps with regex
         headlines = [' '.join(a.split(' ')[2:]) if re.search("^(\d:\d\d|\d\d:\d\d) [APM]{2}", a) else a for a in headlines]
-        headlines = [{"headline": a, "magazine": "haaretz"} for a in headlines]
+        headlines = [{"headline": a, "magazine": "haaretz"} for a in headlines if len(a) > 2]
         
     elif "israelhayom" in address:
         # get headlines
@@ -34,11 +31,7 @@ def get_headlines(address):
     return headlines
 
 def create_csv(headlines): # creates a csv file of the headlines and their tag
-    with open('headlines.csv', 'w', newline='') as file:
+    with open('headlines.csv', 'w', newline='', encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=["headline", "magazine"])
         writer.writeheader()
         writer.writerows(headlines)
-            
-
-if __name__ =="__main__":
-    main()
